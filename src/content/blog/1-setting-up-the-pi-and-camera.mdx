@@ -1,0 +1,124 @@
+---
+title: "Setting up the device and camera"
+description: "This post introduces the Raspberry Pi and camera setup, and how to retrieve images from the camera with code"
+pubDate: "Feb 15 2025"
+heroImage: "../../assets/1-raspberry-pi-snapshot.jpg"
+---
+
+The origins of this project were having a spare Raspberry Pi device sitting around at home, unused, and wanting to tinker with some hardware.
+
+## The Hardware
+
+The device I'm using here is a Raspberry Pi Zero 2 W loaded up with a 128MB SD Card. Nothing fancy here, aside from the fact that this old model has WiFi so it was easy to SSH or VNC onto to configure and manage. If you have a different device this should work fine. I'd err on the side of older models of Pi devices over newer ones because they're a) likely to be cheaper and more broadly supported, and b) easier to obtain aside from supply chain weirdness.
+
+Finding a suitable camera was definitely the hardest part here, and rather than going with [the official camera module](https://www.raspberrypi.com/products/camera-module-v2/) at the time or [the current offical camera module](https://www.raspberrypi.com/products/camera-module-3/) I ended up ordering with an Amazon listing that cost double the amount it does today (and I believe is the v1 camera module). Sigh. 2022 was a stupid time.
+
+I did not have much confidence that I'd chosen the right model at the time, and relied on the listing details to help troubleshoot issues because supporting documentation was non-existent. This is the context I had:
+
+> Raspberry Pi Zero W Camera Module 160FOV 5MP Fisheye Lens Camera Wide Angle 160 Degree OV5647 1080P Sensor HD Webcam Video with Zero Cable for Raspberry Pi Model 4/3 B/B+ A+ RPi 3/2/1/zero/zero W
+
+Thankfully the libcamera ecosystem is outstanding for Raspberry PI, with plenty of [included tools](https://www.raspberrypi.com/documentation/computers/camera_software.html) as well as [a really great Python library](https://github.com/raspberrypi/picamera2) and [PDF guide](https://pip-assets.raspberrypi.com/categories/652-raspberry-pi-camera-module-2/documents/RP-008156-DS-2-picamera2-manual.pdf?disposition=inline) that goes into depth about how to interact with your hardware via Python code.
+
+## Poking at the camera
+
+I'll do a separate writeup of the onboarding problems that I had during setup (it was 3-ish years ago and I don't think I have the artifacts from that testing, so I'd need to use the actual camera again) but the two main hurdles I had at the time:
+
+- unless your camera supports autofocus, you'll need to manually focus the camera by twisting the lens
+
+import TwistingLens from "../../assets/1-twisting-lens.jpg";
+import { Image } from "astro:assets";
+
+<Image
+  width={1600}
+  height={1600}
+  src={TwistingLens}
+  alt="Photo of camera module with thread indicating which part needs to be twisted to change the focus"
+/>
+
+- unless you specify the tuning file, the defaults may choose a tuning file that enables IR (infra-red)
+
+It took me a bit to realize that `OV5647` is the camera module identifier, and while I was able to view an image from the camera without specifying any settings it had a red tint to it. In this case I needed to update my script to use the `noir` tuning file via code:
+
+```python
+from picamera2 import Picamera2
+
+tuning = Picamera2.load_tuning_file("ov5647_noir.json")
+
+picam = Picamera2(tuning=tuning)
+config = picam.create_still_configuration()
+
+picam.start()
+picam.switch_mode(config)
+
+print(f"controls: {repr(picam.camera_controls)}")
+```
+
+All of these tuning files are located under `/usr/share/libcamera/ipa/rpi/vc4/` on my device, if you are working with a different camera module.
+
+```sh
+$ ls /usr/share/libcamera/ipa/rpi/vc4/
+imx219.json       imx290.json       imx327.json  imx415_b0569.json  imx477.json             imx500.json  imx708_noir.json       ov5647.json       ov7251_mono.json  uncalibrated.json  vd56g3.json
+imx219_noir.json  imx296.json       imx335.json  imx415.json        imx477_noir.json        imx519.json  imx708_wide.json       ov5647_noir.json  ov9281_mono.json  vd55g1.json        vd56g3_mono.json
+imx283.json       imx296_mono.json  imx378.json  imx462.json        imx477_scientific.json  imx708.json  imx708_wide_noir.json  ov64a40.json      se327m12.json     vd55g1_mono.json
+```
+
+The `controls:` output line dumps out a lot of details around how things are configured for the camera before taking the photo - if you wanted to adjust these settings to get a different picture off the camera (instead of doing post-processing). The PDF guide above is a great guide to all of these knobs.
+
+```
+controls: {'AnalogueGainMode': (0, 1, 0), 'ColourCorrectionMatrix': (0.0, 8.0, None), 'AwbEnable': (False, True, None), 'HdrMode': (0, 4, 0), 'ScalerCrop': ((0, 0, 64, 64), (0, 0, 2592, 1944), (0, 0, 2592, 1944)), 'AeMeteringMode': (0, 3, 0), 'ExposureTime': (130, 3066985, 20000), 'FrameDurationLimits': (63965, 3067365, (33333, 33333)), 'SyncMode': (0, 2, 0), 'SyncFrames': (1, 1000000, 100), 'StatsOutputEnable': (False, True, False), 'Saturation': (0.0, 32.0, 1.0), 'AwbMode': (0, 7, 0), 'Brightness': (-1.0, 1.0, 0.0), 'AeConstraintMode': (0, 3, 0), 'Contrast': (0.0, 32.0, 1.0), 'AeEnable': (False, True, True), 'Sharpness': (0.0, 16.0, 1.0), 'ColourTemperature': (100, 100000, None), 'AeFlickerPeriod': (100, 1000000, None), 'AnalogueGain': (1.0, 63.9375, 1.0), 'AeFlickerMode': (0, 1, 0), 'ExposureTimeMode': (0, 1, 0), 'CnnEnableInputTensor': (False, True, False), 'ColourGains': (0.0, 32.0, None), 'NoiseReductionMode': (0, 4, 0), 'AeExposureMode': (0, 3, 0), 'ExposureValue': (-8.0, 8.0, 0.0)}
+```
+
+Another way to troubleshoot this if you have VNC setup is to run the `rpicam-hello` program, which opens a window with a preview of the camera output for a period of time:
+
+```sh
+$ rpicam-hello --tuning-file /usr/share/libcamera/ipa/rpi/vc4/ov5647_noir.json -t 60s
+```
+
+This allowed me to adjust the focus on the camera in real-time and ensure the soil containers are not blurry.
+
+## Retrieving an image using Python
+
+A lot of this code is still vestigial from when I was first getting this running, but I've left it around because it's working for my situation:
+
+```python
+# choose your desired tuning file
+tuning = Picamera2.load_tuning_file("ov5647_noir.json")
+
+picam = Picamera2(tuning=tuning)
+
+# other setup for camera
+
+# is this sleep even necessary now?
+time.sleep(1)
+
+# this could probably be `capture_buffer` as we're only using one buffer
+# wait=True makes this blocking until the job completes
+buffers, metadata = picam.capture_buffers(["main"], wait=True)
+# this converts the bytes from the camera into PIL (Python Image Library) object
+# so we can then store the image data on disk
+image = picam.helpers.make_image(buffers[0], config["main"])
+
+# debugging to observe the camera metadata associated with the image for this screenshot
+print(f"metadata: {repr(metadata)}")
+
+# stop using the camera until the next time
+picam.close()
+
+# convert the PIL object into a JPEG image
+image_array = io.BytesIO()
+image.save(image_array, format='JPEG')
+# ensure the stream is reset after populating
+image_array.seek(0)
+```
+
+The `metadata: ` output from the image helps to see if anything is misbehaving after reading the image buffer:
+
+```
+metadata: {'SensorTimestamp': 82666488924000, 'ExposureTime': 17811, 'ColourGains': (1.2839946746826172, 1.1705304384231567), 'ColourCorrectionMatrix': (1.850752592086792, -0.4653230905532837, -0.38543909788131714, -0.44199520349502563, 1.6804940700531006, -0.23849883675575256, 0.03879337012767792, -0.8604204058647156, 1.8216270208358765), 'FrameDuration': 63965, 'SensorBlackLevels': (1024, 1024, 1024, 1024), 'AeState': 1, 'DigitalGain': 1.0000187158584595, 'AnalogueGain': 2.0, 'ColourTemperature': 4500, 'Lux': 893.2876586914062, 'FocusFoM': 41083, 'ScalerCrop': (0, 0, 2592, 1944), 'FrameWallClock': 1771176804767261184}
+```
+
+The full code for this is available on [GitHub](https://github.com/shiftkey/pi-read-image-from-camera).
+
+## Mounting the camera
+
+Because we're dealing with water in the growing light setup, and we want a consistent position from each image captured from the camera, we should create a mount for the camera to keep it close but also out of trouble. That'll be the next topic to write up.
