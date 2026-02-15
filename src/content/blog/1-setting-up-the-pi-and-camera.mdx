@@ -5,8 +5,6 @@ pubDate: "Feb 15 2025"
 heroImage: "../../assets/1-raspberry-pi-snapshot.jpg"
 ---
 
-
-
 The origins of this project were having a spare Raspberry Pi device sitting around at home, unused, and wanting to tinker with some hardware.
 
 ## The Hardware
@@ -25,15 +23,19 @@ Thankfully the libcamera ecosystem is outstanding for Raspberry PI, with plenty 
 
 I'll do a separate writeup of the onboarding problems that I had during setup (it was 3ish years ago I don't think I recorded the artifacts and would need to use the actual camera again) but the two main hurdles I had at the time:
 
- - unless your camera supports autofocus, you'll need to manually focus the camera by twisting the lens
+- unless your camera supports autofocus, you'll need to manually focus the camera by twisting the lens
 
-import TwistingLens from '../../assets/1-twisting-lens.jpg';
-import { Image } from 'astro:assets';
+import TwistingLens from "../../assets/1-twisting-lens.jpg";
+import { Image } from "astro:assets";
 
-<Image width={1600} height={1600} src={TwistingLens} alt="Photo of camera module with thread indicating which part needs to be twisted to change the focus" />
+<Image
+  width={1600}
+  height={1600}
+  src={TwistingLens}
+  alt="Photo of camera module with thread indicating which part needs to be twisted to change the focus"
+/>
 
-
- - unless you specify the tuning file, the defaults may choose a tuning file that enables IR (infra-red)
+- unless you specify the tuning file, the defaults may choose a tuning file that enables IR (infra-red)
 
 It took me a bit to realize that `OV5647` is the camera module, and while I was able to view an image from the camera it had a red tint to it. In this case I needed to update my script to use the `noir` tuning file via code:
 
