@@ -2,6 +2,8 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import CurrentShot from '../assets/current-shot-cropped.jpg';
+import { Image } from 'astro:assets';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 ---
 
@@ -18,9 +20,9 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 				before they can be transplanted outside in the spring.
 			</p>
 			<p>
-				Due to the short growing season in my part of Canada (June through to September to avoid the frost risk)
-				starting seeds indoors under a grow light is common, and many plants benefit from the head start compared
-				to direct sowing.
+				Due to the short growing season in my part of Canada - June through to September unless the plants
+				can tolerate frost -  starting seeds indoors under lights is common, and many plants benefit from
+				the head start compared to direct sowing.
 			</p>
 			<p>
 				For those who are curious about the details, check out the blog for more details. Now that it's up
@@ -31,6 +33,12 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 				This year I'm mostly focused on getting peppers started, as we often use these for cooking
 				as well as in hot sauces. But there are some colourful options in this batch, and the local bees
 				are fans of the flowers.
+			</p>
+			<div>
+				<Image width={1600} height={1600} src={CurrentShot} alt="A view of the camera arm and the seed starters under the grow light" />
+			</div>
+			<p>
+				Currently the view from the camera is uneventful, but that's because the seeds were planted just yesterday.
 			</p>
 		</main>
 		<Footer />
