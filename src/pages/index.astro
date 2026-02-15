@@ -1,0 +1,38 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<p>
+				This is a small website where I'm documenting and sharing the annual planting of seeds that I do 
+				before they can be transplanted outside in the spring.
+			</p>
+			<p>
+				Due to the short growing season in my part of Canada (June through to September to avoid the frost risk)
+				starting seeds indoors under a grow light is common, and many plants benefit from the head start compared
+				to direct sowing.
+			</p>
+			<p>
+				For those who are curious about the details, check out the blog for more details. Now that it's up
+				and running, I'll have time to actually write more about the setup, and my earlier attempt at this
+				back in 2023.
+			</p>
+			<p>
+				This year I'm mostly focused on getting peppers started, as we often use these for cooking
+				as well as in hot sauces. But there are some colourful options in this batch, and the local bees
+				are fans of the flowers.
+			</p>
+		</main>
+		<Footer />
+	</body>
+</html>

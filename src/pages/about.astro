@@ -1,0 +1,51 @@
+---
+import AboutHeroImage from '../assets/about-banner.jpg';
+import CameraSetupImage from '../assets/about-camera-setup.jpg';
+import Layout from '../layouts/BlogPost.astro';
+import { Image } from 'astro:assets';
+---
+
+<Layout
+	title="About this project"
+	description=""
+	pubDate={new Date('Feb 15 2026')}
+	heroImage={AboutHeroImage}
+>
+	<p>
+		Plants and the growing and sustaining of said plants is one of the things I enjoy most these days, and even in the depths of winter
+		it is enjoyable to be thinking ahead to when I can next be outside and enjoying nature without requiring several layers.
+	</p>
+
+	<p>
+		This project is made up of a few components:
+	</p>
+
+	<ul>
+		<li>A grow light, with self-watering reservoir and wicking mat</li>
+		<li>Seeds in container of dirt</li>
+		<li>A Raspberry Pi with camera attached, scheduled to take a picture using a Python script</li>
+		<li>Some 3D printed components to mount the hardware close to the seeds</li>
+		<li>A location to store the timestamped images</li>
+		<li>Automation to publish new content to this website over time</li>
+	</ul>
+
+	<div >
+		<Image width={1600} height={1600} src={CameraSetupImage} alt="A view of the camera arm and the seed starters under the grow light" />
+	</div>
+
+	<p>
+		The <a href="/blog">Blog</a> section of the site will dig into more of the detail, and what I've learned from getting this setup. I will
+		caution that a lot of this is specific to my setup  - this is also my second time iterating on this setup - and I'm not intending for this
+		to be a do-it-yourself setup as there is a number of moving pieces involved. But if you're interested in this I hope it serves as inspiration
+		for doing your own thing.
+	</p>
+
+	<p>
+		<strong>Why the need to record over time?</strong> When I last did this in 2023, the time lapse video shows lots of details
+		that aren't obvious in the moment, like how the seedlings break out from the soil initially and how they move over the course of the day.
+	</p>
+
+	<p>
+		If you have any questions, please ping the project account on <a href="https://bsky.app/profile/growing.shiftkey.online">Bluesky</a>.
+	</p>
+</Layout>
