@@ -1,5 +1,5 @@
 // Place any global data in this file.
 // You can import this data from anywhere in your site by using the `import` keyword.
 
-export const SITE_TITLE = "growing.shiftkey.online";
+export const SITE_TITLE = "growing things";
 export const SITE_DESCRIPTION = "just starting some seeds";
