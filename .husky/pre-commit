@@ -1,0 +1,2 @@
+exiftool -r -gps:all= -overwrite_original .
+npm run lint:fix
