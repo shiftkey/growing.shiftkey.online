@@ -25,9 +25,13 @@ this setup, so I want to shout them out in the meantime:
 
 ### Install the missing package (if not already installed)
 
+For Debian-based systems, this is the package that you need:
+
 ```sh
 $ sudo apt install cifs-utils
 ```
+
+I haven't checked for others, so YMMV.
 
 ### Create the credentials file
 
@@ -83,7 +87,8 @@ Create the new service file:
 $ sudo nano '/etc/systemd/system/mnt-my\x2dcool\x2dshare.mount'
 ```
 
-Fill out the details like below:
+Fill out the details like below - rather than mounting the whole shared folder I
+map a specific subfolder on the share to this directory on the client:
 
 ```
 Requires=network-online.target
@@ -99,9 +104,9 @@ Options=credentials=/etc/smb-credentials
 WantedBy=multi-user.target
 ```
 
-By default the files in this directory will be `755` (`-rwxr-xr-x`), and if you
-want to allow non-root users to be able to write to the share you can add this
-to the `Options` line:
+By default the files in this shared directory will be `755` (`-rwxr-xr-x`) on
+the client. If you want to allow non-root users to be able to write to the share
+you can add this to the `Options` line:
 
 ```
 Options=credentials=/etc/smb-credentials,file_mode=0777,dir_mode=0777
@@ -120,6 +125,13 @@ should be able to see the files in the shared directory:
 ```
 $ ls /mnt/my-cool-share | wc -l
 568
+```
+
+If you need to change the contents of the service, ensure you reload the systemd
+daemon with the latest definition:
+
+```
+$ sudo systemctl daemon-reload
 ```
 
 ### Frequently Asked Questions
