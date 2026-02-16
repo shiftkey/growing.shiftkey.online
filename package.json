@@ -19,5 +19,12 @@
   },
   "devDependencies": {
     "prettier": "^3.8.1"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": false,
+    "proseWrap": "always"
   }
 }
