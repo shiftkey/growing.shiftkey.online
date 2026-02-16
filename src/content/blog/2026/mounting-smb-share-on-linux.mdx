@@ -1,0 +1,144 @@
+---
+title: "Mounting a SMB share on Linux using systemd"
+description:
+  "I've had to do this twice recently, and I figure I should write this up more
+  formally for the next time"
+pubDate: "Feb 16 2026 6:00:00 PM"
+heroImage: "../../../assets/smb/hero-banner.jpg"
+---
+
+As part of the setup this time around (more details on this later), I've moved
+the storage of the images to a shared folder on a local NAS. Rather than making
+each of the tools authenticate to interact with the share, the simpler solution
+here is to mount the directory on each host that needs to interact with the
+shared folder.
+
+Linux SMB support is pretty great these days (compared to the bad old days) but
+that's a topic for another day.
+
+This guide amalgamates a couple of other guides that I pored over while getting
+this setup, so I want to shout them out in the meantime:
+
+- [Mount an SMB Share in Linux](https://www.linode.com/docs/guides/linux-mount-smb-share/)
+- [How to Reliably Mount a CIFS Share Using systemd on Boot](https://dev.to/edgaras/how-to-reliably-mount-a-cifs-share-using-systemd-on-boot-2l8i)
+- [Systemd mount fails. Where= setting doesn't match unit name](https://unix.stackexchange.com/questions/283442/systemd-mount-fails-where-setting-doesnt-match-unit-name)
+
+### Install the missing package (if not already installed)
+
+```sh
+$ sudo apt install cifs-utils
+```
+
+### Create the credentials file
+
+Create a file to store the credentials for connecting to the SMB share:
+
+```sh
+$ sudo nano /etc/smb-credentials
+```
+
+Fill in the details to connect to the SMB share:
+
+```txt
+username=your_username
+password=your_password
+domain=server-name.local
+```
+
+If you aren't able to ping the host, you might need to use the IP address of the
+server for the `domain` field.
+
+Lock down the file to only be accessible to `root`:
+
+```sh
+$ sudo chmod 600 /etc/smb-credentials
+$ sudo chown root:root /etc/smb-credentials
+```
+
+### Create the mount service
+
+Create the desired share directory under `/mnt` for convenience:
+
+```
+$ sudo mkdir /mnt/my-cool-share
+```
+
+**Note:** because Systemd has requirements about mapping mount directories to
+service names in a consistent patterh, there's specific commands you need to run
+based on the directory chosen above if your path has special characters in it
+(like dashes). So ensure you have the chosen name set here before you go
+further, as the commands depend on the path you made earlier.
+
+```
+$ systemd-escape -p --suffix=mount "/mnt/my-cool-share"
+mnt-my\x2dcool\x2dshare.mount
+```
+
+Those backticks need to be preserved when sending through subsequent commands,
+so ensure you wrap the service name or full path in single-quotes.
+
+Create the new service file:
+
+```
+$ sudo nano '/etc/systemd/system/mnt-my\x2dcool\x2dshare.mount'
+```
+
+Fill out the details like below:
+
+```
+Requires=network-online.target
+Wants=networking.service
+
+[Mount]
+What=//server-name.local/path/to/shared-directory
+Where=/mnt/my-cool-share
+Type=cifs
+Options=credentials=/etc/smb-credentials
+
+[Install]
+WantedBy=multi-user.target
+```
+
+By default the files in this directory will be `755` (`-rwxr-xr-x`), and if you
+want to allow non-root users to be able to write to the share you can add this
+to the `Options` line:
+
+```
+Options=credentials=/etc/smb-credentials,file_mode=0777,dir_mode=0777
+```
+
+Now you can try and start the service:
+
+```
+$ sudo systemctl enable '/etc/systemd/system/mnt-my\x2dcool\x2dshare.mount'
+$ sudo systemctl start 'mnt-my\x2dcool\x2dshare.mount'
+```
+
+If you don't see any output, the service has started successfully, and you can
+should be able to see the files in the shared directory:
+
+```
+$ ls /mnt/my-cool-share | wc -l
+568
+```
+
+### Frequently Asked Questions
+
+> **Why not just use `/etc/fstab`**?
+
+I probably could have, but given the SMB share is on the network I wanted to
+defer this until after the networking stack is available on the client machine.
+
+I also have memories of just messing up `/etc/fstab` entries and hosing my
+machine from back in the day, and while this requires a bit more setup it's much
+harder to break your machine (and doesn't require rebooting to validate that it
+works).
+
+> **Why not use something else (like FTP or SSH) to upload the file?**
+
+- Because the NAS server supported this out of the box, and I'd already created
+  shares for other reasons
+- Because I didn't want to teach each tool how to authenticate and traverse the
+  server to put the file in the right spot
+- I have Node, C# and Bash scripts lying around, and interacting with files and
+  folders is easy
