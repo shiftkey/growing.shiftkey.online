@@ -4,7 +4,19 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import CurrentShot from '../assets/current-shot-cropped.jpg';
 import { Image } from 'astro:assets';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { parseISO,format } from 'date-fns';
+import { SITE_DESCRIPTION, SITE_TITLE, LAST_SCREENSHOT_ISO_8601 } from '../consts';
+
+const parsedDate = parseISO(LAST_SCREENSHOT_ISO_8601);
+
+function getTimeText() {
+	return format(parsedDate, 'h:mm bbb');
+}
+
+
+function getDateText(){
+return format(parsedDate, 'MMMM dd');
+}
 ---
 
 <!doctype html>
@@ -20,26 +32,27 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 				This is a small website where I'm documenting and sharing the annual planting of seeds that I do 
 				before they can be transplanted outside in the spring.
 			</p>
+			<div>
+				<Image width={1600} height={1600} src={CurrentShot} alt="A view of the camera arm and the seed starters under the grow light" />
+			</div>
 			<p>
-				Due to the short growing season in my part of Canada - June through to September unless the plants
-				can tolerate frost -  starting seeds indoors under lights is common, and many plants benefit from
-				the head start compared to direct sowing.
-			</p>
-			<p>
-				For those who are curious about the details, check out the blog for more details. Now that it's up
-				and running, I'll have time to actually write more about the setup, and my earlier attempt at this
-				back in 2023.
+				The view from the camera as of <strong>{getTimeText()} on {getDateText()}</strong> is uneventful, but that's
+				because the seeds were planted on <strong>February 14</strong>. Do check back in later.
 			</p>
 			<p>
 				This year I'm mostly focused on getting peppers started, as we often use these for cooking
 				as well as in hot sauces. But there are some colourful options in this batch, and the local bees
 				are fans of the flowers.
 			</p>
-			<div>
-				<Image width={1600} height={1600} src={CurrentShot} alt="A view of the camera arm and the seed starters under the grow light" />
-			</div>
 			<p>
-				Currently the view from the camera is uneventful, but that's because the seeds were planted on February 14.
+				Due to the short growing season in my part of Canada - June through to September unless the plants
+				can tolerate frost -  starting seeds indoors under lights is common, and many plants benefit from
+				the head start compared to direct sowing.
+			</p>
+			<p>
+				For those who want to read about the details, check out <a href="/blog">the blog</a>. Now that the setup
+				is up and gathering images, I'll have time to actually write more about what's happening
+				under the hood, as well as write up my earlier attempt at this back in 2023 that I had to abandon.
 			</p>
 		</main>
 		<Footer />

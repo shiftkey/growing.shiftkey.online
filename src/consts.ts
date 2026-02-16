@@ -1,5 +1,3 @@
-// Place any global data in this file.
-// You can import this data from anywhere in your site by using the `import` keyword.
-
 export const SITE_TITLE = "growing things";
 export const SITE_DESCRIPTION = "just starting some seeds";
+export const LAST_SCREENSHOT_ISO_8601 = "2026-02-16T18:00:00";
