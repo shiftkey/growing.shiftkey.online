@@ -8,15 +8,9 @@ import { parseISO,format } from 'date-fns';
 import { SITE_DESCRIPTION, SITE_TITLE, LAST_SCREENSHOT_ISO_8601 } from '../consts';
 
 const parsedDate = parseISO(LAST_SCREENSHOT_ISO_8601);
+const timeText = format(parsedDate, 'h:mm bbb');
+const dateText = format(parsedDate, 'MMMM dd');
 
-function getTimeText() {
-	return format(parsedDate, 'h:mm bbb');
-}
-
-
-function getDateText(){
-return format(parsedDate, 'MMMM dd');
-}
 ---
 
 <!doctype html>
@@ -27,7 +21,7 @@ return format(parsedDate, 'MMMM dd');
 	<body>
 		<Header />
 		<main>
-			<h1>Hi there. Let's Grow...</h1>
+			<h1>Hi there. I'm Brendan.</h1>
 			<p>
 				This is a small website where I'm documenting and sharing the annual planting of seeds that I do 
 				before they can be transplanted outside in the spring.
@@ -36,7 +30,7 @@ return format(parsedDate, 'MMMM dd');
 				<Image width={1600} height={1600} src={CurrentShot} alt="A view of the camera arm and the seed starters under the grow light" />
 			</div>
 			<p>
-				The view from the camera as of <strong>{getTimeText()} on {getDateText()}</strong> is uneventful, but that's
+				The view from the camera as of <strong>{timeText} on {dateText}</strong> is uneventful, but that's
 				because the seeds were planted on <strong>February 14</strong>. Do check back in later.
 			</p>
 			<p>
